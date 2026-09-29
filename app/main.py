@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .db import init_db
-from app.routers import ingestion
+from app.routers import ingestion, chat
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,8 +12,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Palm Mind Backend Assessment", version="1.0.0", lifespan=lifespan)
 
-# Include our new router
+# Include routers
 app.include_router(ingestion.router, tags=["Ingestion"])
+app.include_router(chat.router, tags=["Chat"])
 
 @app.get("/health")
 def health_check():

@@ -11,9 +11,18 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
     return text.strip()
 
 def extract_text_from_txt(file_bytes: bytes) -> str:
-    """Extracts text from a standard TXT file."""
-    # Assuming UTF-8 encoding for standard text files
-    return file_bytes.decode("utf-8").strip()
+    """
+    Extracts text from a TXT file.
+    Tries multiple encodings in order: UTF-8-sig (handles BOM), UTF-16, Latin-1.
+    UTF-8-sig automatically strips the BOM if present.
+    Latin-1 is a catch-all since it can decode any byte sequence.
+    """
+    for encoding in ("utf-8-sig", "utf-16", "latin-1"):
+        try:
+            return file_bytes.decode(encoding).strip()
+        except (UnicodeDecodeError, Exception):
+            continue
+    raise ValueError("Could not decode the text file with any supported encoding.")
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
     """Router function to extract text based on the file extension."""

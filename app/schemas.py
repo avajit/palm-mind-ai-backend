@@ -14,10 +14,14 @@ class ChatRequest(BaseModel):
     message: str
 
 class BookingDetails(BaseModel):
+    status: Optional[str] = None
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     date: Optional[str] = None
     time: Optional[str] = None
+    missing: Optional[List[str]] = None
+    errors: Optional[List[str]] = None
+    booking_id: Optional[int] = None
 
 class ChatResponse(BaseModel):
     session_id: str

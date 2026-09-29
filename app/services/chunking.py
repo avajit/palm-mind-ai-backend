@@ -34,32 +34,41 @@ class SentenceChunker:
 
     def chunk(self, text: str) -> List[str]:
         """Splits text by sentences, grouping them up to max_chunk_size, with sentence overlap."""
-        # Simple regex to split by sentences (looks for . ! ? followed by space or newline)
         sentences = re.split(r'(?<=[.!?])[\s\n]+', text)
         sentences = [s.strip() for s in sentences if s.strip()]
         
+        if not sentences:
+            return [text[i:i+self.max_chunk_size] for i in range(0, len(text), self.max_chunk_size - 50)]
+
         chunks = []
-        current_chunk = []
+        current_chunk: List[str] = []
         current_length = 0
         
         i = 0
         while i < len(sentences):
             sentence = sentences[i]
             
-            # If adding this sentence exceeds our limit and we already have sentences in the chunk
+            # If a single sentence is longer than max_chunk_size, split it into character sub-chunks
+            if len(sentence) > self.max_chunk_size:
+                if current_chunk:
+                    chunks.append(" ".join(current_chunk))
+                    current_chunk = []
+                    current_length = 0
+                for sub_i in range(0, len(sentence), self.max_chunk_size - 50):
+                    chunks.append(sentence[sub_i:sub_i + self.max_chunk_size])
+                i += 1
+                continue
+
             if current_length + len(sentence) > self.max_chunk_size and current_chunk:
                 chunks.append(" ".join(current_chunk))
-                # Step back by overlap_sentences to create overlap for the next chunk
-                i = max(0, i - self.overlap_sentences)
-                current_chunk = []
-                current_length = 0
-                continue
-                
+                overlap_slice = current_chunk[-self.overlap_sentences:] if self.overlap_sentences > 0 else []
+                current_chunk = overlap_slice
+                current_length = sum(len(s) + 1 for s in current_chunk)
+            
             current_chunk.append(sentence)
-            current_length += len(sentence) + 1  # +1 for the space
+            current_length += len(sentence) + 1
             i += 1
             
-        # Add the last chunk if it has content
         if current_chunk:
             chunks.append(" ".join(current_chunk))
             
