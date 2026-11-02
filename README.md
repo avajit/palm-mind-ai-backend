@@ -160,10 +160,3 @@ LLM Router / Analyzer (Intent Classification & Query Rewriting)
 
 ---
 
-## **Interview Q&A Guide**
-
-- **Why Qdrant?** Simple, lightweight, containerized, high-performance vector database with no cloud dependency or API keys required.
-- **Why two chunking strategies?** `fixed` size chunking splits text uniformly by character count with overlap, whereas `sentence` chunking respects semantic sentence boundaries, preventing mid-sentence cuts.
-- **Why manual RAG instead of RetrievalQAChain?** Manual RAG (`embed -> search -> prompt -> LLM`) gives complete control over prompt formatting, source attribution, error handling, and debugging without heavy abstraction layers.
-- **How does multi-turn work?** We store rolling conversation history in Redis and use an LLM router to rewrite follow-up user messages into self-contained standalone queries before vector search.
-- **How is booking state managed?** Temporary slot collection is tracked in Redis hashes with TTL. Once all four mandatory fields (`name`, `email`, `date`, `time`) pass validation, the record is durably committed to SQLite.
